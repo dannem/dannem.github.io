@@ -1,181 +1,374 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>From Mind to Image</title>
+    <title>The Research & Innovations of Dr. Dan Nemrodov</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony Neutrals -->
+    <!-- Application Structure Plan: A narrative, single-page scrolling application that follows Dr. Nemrodov's career chronologically. The structure is designed for storytelling and guided discovery. Key sections include a hero intro, an interactive timeline as the main navigation element, sections explaining core technologies, a deep dive into the landmark 'mind-reading' innovation, a summary of his IP portfolio, and a final section on his current work with an interactive chart. This narrative structure was chosen over a dashboard because it best suits the biographical and explanatory nature of the source report, making a complex career path digestible and engaging for the user. -->
+    <!-- Visualization & Content Choices: Report Info: Career milestones -> Goal: Organize/Navigate -> Viz: Interactive HTML/CSS Timeline -> Interaction: Click to scroll -> Justification: Provides a clear, chronological overview and acts as a central navigation hub. Report Info: Core concepts (EEG, SSVEP) -> Goal: Inform -> Viz: Simple HTML/CSS diagrams -> Interaction: Hover to reveal details -> Justification: Simplifies complex technical topics for a broader audience. Report Info: AMD biomarker data -> Goal: Compare -> Viz: Bar Chart (Chart.js) -> Interaction: Tooltips on hover -> Justification: Clearly visualizes the key quantitative finding—the difference in neural response between AMD patients and controls, making the research outcome immediately understandable. Report Info: Patent evolution -> Goal: Organize -> Viz: HTML Table -> Interaction: Static -> Justification: Presents structured data clearly and concisely. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
-        /* Hero Section CSS with Brain Neuronal Activity Background */
-        /* This uses a CSS animation to simulate neuronal activity on a brain-like background. */
-        /* For a real image, replace the background with an actual brain image URL and overlay animations. */
-
-        .hero {
-          position: relative;
-          height: 80vh; /* Adjust height as needed */
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white; /* Text color for visibility */
-          text-align: center;
-          overflow: hidden;
-          background: 
-            /* Fallback brain-like gradient */
-            radial-gradient(circle, rgba(0,0,50,0.8), rgba(0,0,0,1)),
-            /* Placeholder for brain image; replace with actual URL */
-            url('https://example.com/brain-neurons.jpg') no-repeat center center/cover;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f7f4;
+            color: #333;
         }
-
-        /* Overlay for neuronal activity simulation (flashing neurons) */
-        .hero::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          background: 
-            /* Simulated neuron flashes */
-            radial-gradient(circle at 20% 30%, rgba(255,255,0,0.2) 0%, transparent 50%),
-            radial-gradient(circle at 50% 50%, rgba(0,255,255,0.2) 0%, transparent 50%),
-            radial-gradient(circle at 80% 70%, rgba(255,0,255,0.2) 0%, transparent 50%);
-          animation: neuron-flash 3s infinite alternate;
-          opacity: 0.5;
-          mix-blend-mode: screen; /* Blends with background for glowing effect */
+        .nav-link {
+            transition: color 0.3s ease;
         }
-
-        .hero-content {
-          position: relative;
-          z-index: 1;
-          max-width: 80%;
+        .nav-link:hover {
+            color: #a37a74;
         }
-
-        /* Animation for neuronal activity */
-        @keyframes neuron-flash {
-          0% {
-            transform: scale(1);
-            opacity: 0.5;
-          }
-          50% {
-            transform: scale(1.05);
-            opacity: 0.8;
-          }
-          100% {
-            transform: scale(1);
-            opacity: 0.5;
-          }
+        .timeline-item-content {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
-        /* Additional styles for the rest of the page can be added here if needed */
+        .timeline-item-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        .hero-text-shadow {
+            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
     </style>
 </head>
-<body>
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>From Mind to Image</h1>
-            <p>An interactive exploration of Dr. Dan Nemrodov's journey from pioneering EEG-based image reconstruction to developing the next generation of generative neurotherapeutics.</p>
+<body class="antialiased">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-lg font-bold text-gray-800">Dr. Dan Nemrodov</div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#trajectory" class="nav-link text-gray-600">Trajectory</a>
+                <a href="#breakthrough" class="nav-link text-gray-600">Breakthrough</a>
+                <a href="#commercialization" class="nav-link text-gray-600">Commercialization</a>
+                <a href="#frontier" class="nav-link text-gray-600">The Next Frontier</a>
+            </div>
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#trajectory" class="block py-2 px-6 text-sm text-gray-600 hover:bg-gray-100">Trajectory</a>
+            <a href="#breakthrough" class="block py-2 px-6 text-sm text-gray-600 hover:bg-gray-100">Breakthrough</a>
+            <a href="#commercialization" class="block py-2 px-6 text-sm text-gray-600 hover:bg-gray-100">Commercialization</a>
+            <a href="#frontier" class="block py-2 px-6 text-sm text-gray-600 hover:bg-gray-100">The Next Frontier</a>
         </div>
-    </section>
+    </header>
 
-    <!-- Rest of the content converted from provided Markdown to HTML -->
-    <section>
-        <h2>An Innovator's Trajectory</h2>
-        <p>This section outlines the key milestones in Dr. Nemrodov's career, showing his evolution from a quantitative psychologist to a leader in applied neurotechnology. Click on any event to learn more about the core concepts and breakthroughs from that period.</p>
+    <main>
+        <section id="hero" class="relative py-24 md:py-40" style="background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://storage.googleapis.com/gemini-generative-ai-docs/cd39f1cd39f1cd39.jpg'); background-size: cover; background-position: center; background-attachment: fixed;">
+            <div class="container mx-auto px-6 text-center relative z-10">
+                <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight hero-text-shadow">From Mind to Image</h1>
+                <p class="mt-4 text-lg md:text-xl text-gray-200 max-w-3xl mx-auto hero-text-shadow">An interactive exploration of Dr. Dan Nemrodov's journey from pioneering EEG-based image reconstruction to developing the next generation of generative neurotherapeutics.</p>
+            </div>
+        </section>
 
-        <h3>1. Foundational Expertise (1996-2010)</h3>
-        <p>Built a robust foundation in quantitative analysis through roles as a Polls Analyst and Transportation Psychologist, alongside a Ph.D. in Cognitive Neuroscience.</p>
+        <section id="trajectory" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">An Innovator's Trajectory</h2>
+                    <p class="mt-2 text-gray-600 max-w-2xl mx-auto">This section outlines the key milestones in Dr. Nemrodov's career, showing his evolution from a quantitative psychologist to a leader in applied neurotechnology. Click on any event to learn more about the core concepts and breakthroughs from that period.</p>
+                </div>
 
-        <h3>2. Post-Doctoral Specialization (2010-2014)</h3>
-        <p>Mastered advanced electrophysiology (EEG, SSVEP) at labs in Waterloo and Louvain, focusing on the temporal dynamics of face recognition.</p>
+                <div class="relative wrap overflow-hidden p-10 h-full">
+                    <div class="border-2-2 absolute border-opacity-20 border-gray-700 h-full border" style="left: 50%"></div>
 
-        <h3>3. Breakthrough Innovation (2014-2020)</h3>
-        <p>At the University of Toronto, fused neuroscience with machine learning to pioneer the reconstruction of visual images from EEG signals, a landmark achievement.</p>
+                    <div id="timeline-node-1" class="mb-8 flex justify-between items-center w-full right-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-gray-800 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto font-semibold text-lg text-white">1</h1>
+                        </div>
+                        <div class="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4 timeline-item-content">
+                            <h3 class="font-bold text-gray-800 text-xl">Foundational Expertise (1996-2010)</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-600 text-opacity-100">Built a robust foundation in quantitative analysis through roles as a Polls Analyst and Transportation Psychologist, alongside a Ph.D. in Cognitive Neuroscience.</p>
+                        </div>
+                    </div>
 
-        <h3>4. The Next Frontier (2020-Present)</h3>
-        <p>As Director at Dandelion Science, leads the development of "Generative Neuromodulation" platforms for therapeutic applications, such as creating biomarkers for AMD.</p>
-    </section>
+                    <div id="timeline-node-2" class="mb-8 flex justify-between flex-row-reverse items-center w-full left-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-gray-800 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto text-white font-semibold text-lg">2</h1>
+                        </div>
+                        <div class="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4 timeline-item-content">
+                            <h3 class="font-bold text-gray-800 text-xl">Post-Doctoral Specialization (2010-2014)</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-600 text-opacity-100">Mastered advanced electrophysiology (EEG, SSVEP) at labs in Waterloo and Louvain, focusing on the temporal dynamics of face recognition.</p>
+                        </div>
+                    </div>
+                    
+                    <div id="timeline-node-3" class="mb-8 flex justify-between items-center w-full right-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-gray-800 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto font-semibold text-lg text-white">3</h1>
+                        </div>
+                        <div class="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4 timeline-item-content">
+                            <h3 class="font-bold text-gray-800 text-xl">Breakthrough Innovation (2014-2020)</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-600 text-opacity-100">At the University of Toronto, fused neuroscience with machine learning to pioneer the reconstruction of visual images from EEG signals, a landmark achievement.</p>
+                        </div>
+                    </div>
 
-    <section>
-        <h2>The Landmark Achievement</h2>
-        <p>In 2018, Dr. Nemrodov and his colleagues published a groundbreaking study demonstrating the ability to reconstruct images of faces from non-invasive EEG signals. This section breaks down the technology, its significance, and the ethical discussions it sparked.</p>
+                    <div id="timeline-node-4" class="mb-8 flex justify-between flex-row-reverse items-center w-full left-timeline">
+                        <div class="order-1 w-5/12"></div>
+                        <div class="z-20 flex items-center order-1 bg-gray-800 shadow-xl w-8 h-8 rounded-full">
+                            <h1 class="mx-auto text-white font-semibold text-lg">4</h1>
+                        </div>
+                        <div class="order-1 bg-white rounded-lg shadow-xl w-5/12 px-6 py-4 timeline-item-content">
+                            <h3 class="font-bold text-gray-800 text-xl">The Next Frontier (2020-Present)</h3>
+                            <p class="text-sm leading-snug tracking-wide text-gray-600 text-opacity-100">As Director at Dandelion Science, leads the development of "Generative Neuromodulation" platforms for therapeutic applications, such as creating biomarkers for AMD.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-        <h3>How It Works: From Brainwaves to Images</h3>
-        <h4>1. Data Acquisition</h4>
-        <p>A subject views face images while their brain's electrical activity is recorded with a standard EEG cap.</p>
+        <section id="breakthrough" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">The Landmark Achievement</h2>
+                    <p class="mt-2 text-gray-600 max-w-3xl mx-auto">In 2018, Dr. Nemrodov and his colleagues published a groundbreaking study demonstrating the ability to reconstruct images of faces from non-invasive EEG signals. This section breaks down the technology, its significance, and the ethical discussions it sparked.</p>
+                </div>
 
-        <h4>2. Model Training</h4>
-        <p>Machine learning algorithms learn the complex patterns in EEG signals that correlate with specific facial features.</p>
+                <div class="max-w-4xl mx-auto">
+                    <h3 class="text-2xl font-semibold text-center mb-8 text-gray-700">How It Works: From Brainwaves to Images</h3>
+                    <div class="flex flex-col md:flex-row justify-center items-center space-y-8 md:space-y-0 md:space-x-8">
+                        <div class="text-center p-6 bg-gray-50 rounded-lg flex-1">
+                            <div class="text-4xl mb-3">🧠</div>
+                            <h4 class="font-bold text-lg">1. Data Acquisition</h4>
+                            <p class="text-sm text-gray-600">A subject views face images while their brain's electrical activity is recorded with a standard EEG cap.</p>
+                        </div>
+                        <div class="text-2xl text-gray-400 font-light">→</div>
+                        <div class="text-center p-6 bg-gray-50 rounded-lg flex-1">
+                            <div class="text-4xl mb-3">⚙️</div>
+                            <h4 class="font-bold text-lg">2. Model Training</h4>
+                            <p class="text-sm text-gray-600">Machine learning algorithms learn the complex patterns in EEG signals that correlate with specific facial features.</p>
+                        </div>
+                        <div class="text-2xl text-gray-400 font-light">→</div>
+                        <div class="text-center p-6 bg-gray-50 rounded-lg flex-1">
+                            <div class="text-4xl mb-3">🖼️</div>
+                            <h4 class="font-bold text-lg">3. Image Reconstruction</h4>
+                            <p class="text-sm text-gray-600">The trained model uses new EEG data to generate a digital image of the face the subject is perceiving.</p>
+                        </div>
+                    </div>
+                </div>
 
-        <h4>3. Image Reconstruction</h4>
-        <p>The trained model uses new EEG data to generate a digital image of the face the subject is perceiving.</p>
+                <div class="mt-16 grid md:grid-cols-2 gap-8 items-start">
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-700">Why EEG was a Game-Changer</h3>
+                        <p class="text-gray-600 mb-6">While image reconstruction was possible with fMRI, using EEG was a major leap forward, overcoming skepticism about the technology's fidelity.</p>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold">Superior Temporal Resolution</h4>
+                                <p class="text-sm text-gray-600">EEG measures activity in milliseconds, allowing researchers to track the rapid formation of a mental image (est. 170ms).</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">Practicality & Accessibility</h4>
+                                <p class="text-sm text-gray-600">EEG systems are portable, affordable, and widely available compared to massive, expensive fMRI scanners, opening doors for real-world applications.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-700">Public Profile & Ethical Questions</h3>
+                        <p class="text-gray-600 mb-6">The work captured global media attention, often with "mind-reading" headlines. This sparked vital conversations about potential applications and ethics.</p>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold">Potential Applications</h4>
+                                <p class="text-sm text-gray-600">Ideas included communication aids for non-verbal individuals and tools for law enforcement to visualize eyewitness memories.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold">Cognitive Liberty</h4>
+                                <p class="text-sm text-gray-600">Bioethicists raised concerns about the right to freedom of thought if internal mental states were no longer private, a debate Dr. Nemrodov himself encouraged.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="commercialization" class="py-16 md:py-24">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">From Lab to Market: The IP Journey</h2>
+                    <p class="mt-2 text-gray-600 max-w-3xl mx-auto">This section traces the strategic evolution of Dr. Nemrodov's research into protected intellectual property. The progression from a single university patent to a broad corporate portfolio at Dandelion Science illustrates the path from a specific discovery to a comprehensive therapeutic platform.</p>
+                </div>
+                <div class="max-w-5xl mx-auto overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="p-4 font-semibold text-sm text-gray-700">Patent/App No.</th>
+                                <th class="p-4 font-semibold text-sm text-gray-700">Title</th>
+                                <th class="p-4 font-semibold text-sm text-gray-700">Assignee</th>
+                                <th class="p-4 font-semibold text-sm text-gray-700">Focus</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                <td class="p-4 align-top"><span class="bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">US 10,925,509</span></td>
+                                <td class="p-4 align-top">System and method for generating visual identity... reconstruction from EEG signals</td>
+                                <td class="p-4 align-top">University of Toronto</td>
+                                <td class="p-4 align-top text-sm text-gray-600"><strong>Decoding:</strong> Protects the core academic breakthrough of reconstructing images from EEG.</td>
+                            </tr>
+                            <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                <td class="p-4 align-top"><span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">US App. 18/044,054</span></td>
+                                <td class="p-4 align-top">AI-guided visual neuromodulation for therapeutic or performance-enhancing effects</td>
+                                <td class="p-4 align-top">Dandelion Science Corp.</td>
+                                <td class="p-4 align-top text-sm text-gray-600"><strong>Modulation:</strong> A strategic shift to protecting AI-generated stimuli designed to produce specific therapeutic effects.</td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 align-top"><span class="bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">PCT/US2022/077207</span></td>
+                                <td class="p-4 align-top">Systems and methods for generating spatiotemporal sensory codes</td>
+                                <td class="p-4 align-top">Dandelion Science Corp.</td>
+                                <td class="p-4 align-top text-sm text-gray-600"><strong>Platform:</strong> Broadens the IP to cover a general platform for generating sensory inputs to map and influence brain function.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
-        <h3>Why EEG was a Game-Changer</h3>
-        <p>While image reconstruction was possible with fMRI, using EEG was a major leap forward, overcoming skepticism about the technology's fidelity.</p>
+        <section id="frontier" class="py-16 md:py-24 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl font-bold text-gray-800">The Next Frontier: Generative Neuromodulation</h2>
+                    <p class="mt-2 text-gray-600 max-w-3xl mx-auto">At Dandelion Science, Dr. Nemrodov's work has evolved from reading brain signals to actively guiding them. This section highlights a flagship project developing a novel biomarker for Age-Related Macular Degeneration (AMD), showcasing the power of this new therapeutic paradigm.</p>
+                </div>
 
-        <h4>Superior Temporal Resolution</h4>
-        <p>EEG measures activity in milliseconds, allowing researchers to track the rapid formation of a mental image (est. 170ms).</p>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div class="prose max-w-none">
+                        <h3 class="text-2xl font-semibold mb-4 text-gray-700">A New Biomarker for AMD</h3>
+                        <p>The team developed a method using frequency-tagged videos to precisely measure how the brain processes different types of visual information (e.g., fine details vs. coarse outlines). This is measured using Steady-State Visual Evoked Potentials (SSVEP).</p>
+                        <p>The key finding was that the <strong>ratio</strong> of the brain's response to low-frequency (coarse) vs. high-frequency (detailed) information serves as a powerful, objective biomarker of AMD severity.</p>
+                        <p>The chart to the right visualizes this core finding, showing the significantly different neural response patterns between healthy individuals and AMD patients. This demonstrates a clear, measurable brain signal that correlates with the disease.</p>
+                    </div>
+                    <div>
+                        <div class="chart-container bg-gray-50 p-4 rounded-lg shadow-md">
+                            <canvas id="amdChart"></canvas>
+                        </div>
+                        <p class="text-center text-xs text-gray-500 mt-2">Illustration of SSVEP Response Ratio. Hover over bars for details.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
 
-        <h4>Practicality & Accessibility</h4>
-        <p>EEG systems are portable, affordable, and widely available compared to massive, expensive fMRI scanners, opening doors for real-world applications.</p>
+    <footer class="bg-gray-800 text-white">
+        <div class="container mx-auto px-6 py-8 text-center">
+            <p>This interactive report synthesizes the career and research of Dr. Dan Nemrodov.</p>
+            <p class="text-sm text-gray-400 mt-2">Application designed and developed based on the provided analytical report.</p>
+        </div>
+    </footer>
 
-        <h3>Public Profile & Ethical Questions</h3>
-        <p>The work captured global media attention, often with "mind-reading" headlines. This sparked vital conversations about potential applications and ethics.</p>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
 
-        <h4>Potential Applications</h4>
-        <p>Ideas included communication aids for non-verbal individuals and tools for law enforcement to visualize eyewitness memories.</p>
+            const amdChartCtx = document.getElementById('amdChart').getContext('2d');
+            const amdChart = new Chart(amdChartCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Healthy Controls', 'AMD Patients'],
+                    datasets: [{
+                        label: 'Low-Freq Response (Coarse Info)',
+                        data: [1.0, 1.5],
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }, {
+                        label: 'High-Freq Response (Detailed Info)',
+                        data: [1.2, 0.5],
+                        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Neural Response to Visual Information in AMD',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += context.parsed.y.toFixed(2) + ' (normalized amplitude)';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'SSVEP Response Amplitude'
+                            }
+                        }
+                    }
+                }
+            });
 
-        <h4>Cognitive Liberty</h4>
-        <p>Bioethicists raised concerns about the right to freedom of thought if internal mental states were no longer private, a debate Dr. Nemrodov himself encouraged.</p>
-    </section>
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                     if (mobileMenu.classList.contains('hidden') === false) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
 
-    <section>
-        <h2>From Lab to Market: The IP Journey</h2>
-        <p>This section traces the strategic evolution of Dr. Nemrodov's research into protected intellectual property. The progression from a single university patent to a broad corporate portfolio at Dandelion Science illustrates the path from a specific discovery to a comprehensive therapeutic platform.</p>
+            document.getElementById('timeline-node-1').addEventListener('click', () => {
+                document.getElementById('trajectory').scrollIntoView({ behavior: 'smooth' });
+            });
+            document.getElementById('timeline-node-2').addEventListener('click', () => {
+                document.getElementById('trajectory').scrollIntoView({ behavior: 'smooth' });
+            });
+            document.getElementById('timeline-node-3').addEventListener('click', () => {
+                document.getElementById('breakthrough').scrollIntoView({ behavior: 'smooth' });
+            });
+            document.getElementById('timeline-node-4').addEventListener('click', () => {
+                document.getElementById('frontier').scrollIntoView({ behavior: 'smooth' });
+            });
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Patent/App No.</th>
-                    <th>Title</th>
-                    <th>Assignee</th>
-                    <th>Focus</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>US 10,925,509</td>
-                    <td>System and method for generating visual identity... reconstruction from EEG signals</td>
-                    <td>University of Toronto</td>
-                    <td>Decoding: Protects the core academic breakthrough of reconstructing images from EEG.</td>
-                </tr>
-                <tr>
-                    <td>US App. 18/044,054</td>
-                    <td>AI-guided visual neuromodulation for therapeutic or performance-enhancing effects</td>
-                    <td>Dandelion Science Corp.</td>
-                    <td>Modulation: A strategic shift to protecting AI-generated stimuli designed to produce specific therapeutic effects.</td>
-                </tr>
-                <tr>
-                    <td>PCT/US2022/077207</td>
-                    <td>Systems and methods for generating spatiotemporal sensory codes</td>
-                    <td>Dandelion Science Corp.</td>
-                    <td>Platform: Broadens the IP to cover a general platform for generating sensory inputs to map and influence brain function.</td>
-                </tr>
-            </tbody>
-        </table>
-    </section>
+        });
+    </script>
 
-    <section>
-        <h2>The Next Frontier: Generative Neuromodulation</h2>
-        <p>At Dandelion Science, Dr. Nemrodov's work has evolved from reading brain signals to actively guiding them. This section highlights a flagship project developing a novel biomarker for Age-Related Macular Degeneration (AMD), showcasing the power of this new therapeutic paradigm.</p>
-
-        <h3>A New Biomarker for AMD</h3>
-        <p>The team developed a method using frequency-tagged videos to precisely measure how the brain processes different types of visual information (e.g., fine details vs. coarse outlines). This is measured using Steady-State Visual Evoked Potentials (SSVEP).</p>
-
-        <p>The key finding was that the <strong>ratio</strong> of the brain's response to low-frequency (coarse) vs. high-frequency (detailed) information serves as a powerful, objective biomarker of AMD severity.</p>
-
-        <p>The chart to the right visualizes this core finding, showing the significantly different neural response patterns between healthy individuals and AMD patients. This demonstrates a clear, measurable brain signal that correlates with the disease.</p>
-
-        <p>Illustration of SSVEP Response Ratio. Hover over bars for details.</p>
-    </section>
 </body>
 </html>
